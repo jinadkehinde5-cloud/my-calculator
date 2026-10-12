@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Calculator</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #eef2ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.calculator {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    width: 300px;
+    box-shadow: 0 5px 20px #bbb;
+}
+
+h2 {
+    text-align: center;
+    color: #333;
+}
+
+#display {
+    width: 100%;
+    height: 60px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+    font-size: 25px;
+    text-align: right;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+.buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+button {
+    padding: 18px 5px;
+    font-size: 20px;
+    border: none;
+    border-radius: 8px;
+    background: #e0e7ff;
+    cursor: pointer;
+}
+
+button:active {
+    background: #a5b4fc;
+}
+
+.operator {
+    background: #c7d2fe;
+}
+
+.clear {
+    background: #fca5a5;
+}
+
+.equal {
+    background: #86efac;
+}
+</style>
+</head>
+
+<body>
+<div class="calculator">
+    <h2>My Calculator</h2>
+
+    <input type="text" id="display" value="0" readonly>
+
+    <div class="buttons">
+        <button class="clear" onclick="clearDisplay()">C</button>
+        <button onclick="deleteLast()">DEL</button>
+        <button class="operator" onclick="add('/')">÷</button>
+        <button class="operator" onclick="add('*')">×</button>
+
+        <button onclick="add('7')">7</button>
+        <button onclick="add('8')">8</button>
+        <button onclick="add('9')">9</button>
+        <button class="operator" onclick="add('-')">−</button>
+
+        <button onclick="add('4')">4</button>
+        <button onclick="add('5')">5</button>
+        <button onclick="add('6')">6</button>
+        <button class="operator" onclick="add('+')">+</button>
+
+        <button onclick="add('1')">1</button>
+        <button onclick="add('2')">2</button>
+        <button onclick="add('3')">3</button>
+        <button class="equal" onclick="calculate()">=</button>
+
+        <button onclick="add('0')">0</button>
+        <button onclick="add('00')">00</button>
+        <button onclick="add('.')">.</button>
+        <button onclick="clearDisplay()">AC</button>
+    </div>
+</div>
+
+<script>
+const display = document.getElementById('display');
+let expression = '';
+let finished = false;
+
+function update() {
+    display.value = expression || '0';
+}
+
+function add(value) {
+    if (finished && /[0-9.]/.test(value)) {
+        expression = '';
+    }
+    finished = false;
+
+    if (/[+\-*/]/.test(value)) {
+        if (!expression) {
+            if (value !== '-') return;
+        } else if (/[+\-*/]$/.test(expression)) {
+            expression = expression.slice(0, -1);
+        }
+    }
+
+    expression += value;
+    update();
+}
+
+function clearDisplay() {
+    expression = '';
+    finished = false;
+    update();
+}
+
+function deleteLast() {
+    expression = expression.slice(0, -1);
+    finished = false;
+    update();
+}
+
+function calculate() {
+    if (!expression) return;
+
+    try {
+        if (!/^[0-9+\-*/.() ]+$/.test(expression)) {
+            throw new Error();
+        }
+
+        const result = Function(
+            '"use strict"; return (' + expression + ')'
+        )();
+
+        display.value = Number.isFinite(result)
+            ? String(result)
+            : 'Error';
+
+        expression = Number.isFinite(result)
+            ? String(result)
+            : '';
+
+        finished = true;
+    } catch {
+        display.value = 'Error';
+        expression = '';
+        finished = true;
+    }
+}
+</script>
+</body>
+</html>
